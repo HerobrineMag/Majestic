@@ -1,42 +1,73 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/main/source.lua", true))()
 
-local Window = OrionLib:MakeWindow({
-    Name = "MajesticHUB",
-    HidePremium = false,
-    IntroText = "Loading MajesticHUB",
-    SaveConfig = true,
-    ConfigFolder = "MagHUBv1"
+local Window = Luna:CreateWindow({
+	Name = "MajesticHUB",
+	Subtitle = nil,
+	LogoID = "82795327169782",
+	LoadingEnabled = true,
+	LoadingTitle = "Loaded MajesticHUB...",
+	LoadingSubtitle = "by HerobrineMag",
+
+	ConfigSettings = {
+		RootFolder = nil, 
+		ConfigFolder = "MajesticHUB"
+	},
+
+	KeySystem = false, 
+	KeySettings = {
+		Title = "Luna Example Key",
+		Subtitle = "Key System",
+		Note = "Best Key System Ever! Also, Please Use A HWID Keysystem like Pelican, Luarmor etc. that provide key strings based on your HWID since putting a simple string is very easy to bypass",
+		SaveInRoot = false, 
+		SaveKey = true,
+		Key = {"Example Key"},
+		SecondAction = {
+			Enabled = true,
+			Type = "Link",
+			Parameter = ""
+		}
+	}
 })
 
-local MiskTab = Window:MakeTab({
-    Name = "Misk",
-    Icon = "rbxassetid://4483362458",
-    PremiumOnly = false
+local MiskTab = Window:CreateTab({
+    Name = "Main",
+    Icon = "4483362458",
 })
 
-local ESPTab = Window:MakeTab({
+local ESPTab = Window:CreateTab({
     Name = "ESP",
-    Icon = "rbxassetid://4483362458",
-    PremiumOnly = false
+    Icon = "4483362458"
 })
 
-local AimbotTab = Window:MakeTab({
+local AimbotTab = Window:CreateTab({
     Name = "AimBot",
-    Icon = "rbxassetid://4483362458",
-    PremiumOnly = false
+    Icon = "4483362458",
 })
 
-local DeathBallTab = Window:MakeTab({
+local DeathBallTab = Window:CreateTab({
     Name = "Death Ball",
-    Icon = "rbxassetid://138671771936723",
-    PremiumOnly = false
+    Icon = "138671771936723",
 })
 
-MiskTab:AddButton({
-    Name = "Infinite Yield",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-    end    
+local Bind = Tab:CreateBind({
+	Name = "MainMenu",
+	Description = nil,
+	CurrentBind = "LAlt", -- Check Roblox Studio Docs For KeyCode Names
+	HoldToInteract = false, -- When true, Instead of toggling, You hold to achieve the active state of the Bind
+    	Callback = function()
+    	end,
+
+	OnChangedCallback = function(Bind)
+	 Window.Bind = Bind
+	end,
+}, "WindowMenuBind") 
+
+local Button = Tab:CreateButton({
+	Name = "Infinite Yield",
+	Description = nil, 
+    	Callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    	end
 })
 
 local player = game.Players.LocalPlayer
@@ -52,24 +83,22 @@ local function updateSpeed(value)
     speed = value
 end
 
-local SpeedTab = Window:MakeTab({
+local SpeedTab = Window:CreateTab({
     Name = "SpeedHack",
     Icon = "rbxassetid://6031095930",
-    PremiumOnly = false
 })
 
-SpeedTab:AddSlider({
-    Name = "Скорость",
-    Min = 25,
-    Max = maxSpeed,
+local Speed = Tab:CreateSlider({
+    Name = "Speed",
+	Range = {humanoid.WalkSpeed, maxSpeed},
+	Increment = 1,
     Default = defaultSpeed,
-    Color = Color3.fromRGB(0, 255, 0),
-    Increment = 1,
-    ValueName = "Скорость",
-    Callback = function(value)
+    CurrentValue = humanoid.WalkSpeed,
+    Callback = function(Value)
         updateSpeed(value)
-    end
-})
+    end	
+}, "Slider")
+
 
 game:GetService("RunService").Heartbeat:Connect(function()
     if humanoid.MoveDirection.Magnitude > 0 then
@@ -127,19 +156,22 @@ game.Players.PlayerAdded:Connect(function(player)
     addESPToPlayer(player)
 end)
 
-ESPTab:AddToggle({
-    Name = "Enable ESP",
-    Default = espEnabled,
-    Callback = function(Value)
-        espEnabled = Value
-        updateESP()
-    end
-})
+local ESPTab = Tab:CreateToggle({
+	Name = "Enable ESP",
+	Description = nil,
+	CurrentValue = false,
+    	Callback = function(Value)
+            espEnabled = Value
+            updateESP()
+    	end
+}, "Toggle")
 
-ESPTab:AddColorpicker({
+local ESPTab = Tab:CreateColorPicker({
     Name = "ESP Color",
     Default = espColor,
-    Callback = function(Value)
+	Color = Color3.fromRGB(86, 171, 128),
+	Flag = "ColorPicker1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Value)
         espColor = Value
         for _, highlight in pairs(highlightTable) do
             if highlight then
@@ -147,7 +179,7 @@ ESPTab:AddColorpicker({
             end
         end
     end
-})
+}, "ColorPicker")
 
 
 local player = game.Players.LocalPlayer
@@ -265,19 +297,31 @@ AimbotTab:AddToggle({
         end
     end
 })
-
-AimbotTab:AddSlider({
-    Name = "Aim Radius",
-    Min = 50,
-    Max = 500,
-    Default = aimRadius,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 10,
-    ValueName = " px",
-    Callback = function(Value)
-        aimRadius = Value
+local AimbotTab = Tab:CreateToggle({
+	Name = "Enable Aimbot",
+    Default = aimbotEnabled,
+	Description = nil,
+	CurrentValue = false,
+    	Callback = function(Value)
+        aimbotEnabled = Value
+        if aimbotEnabled then
+            enableAimbot()
+        else
+            disableAimbot()
+        end
     end
-})
+}, "Toggle")
+
+local AimbotRadius = Tab:CreateSlider({
+    Name = "Aim Radius",
+	Range = {0, 300}, -- The Minimum And Maximum Values Respectively
+	Increment = 1,
+    Default = aimRadius,
+    CurrentValue = 0,
+    	Callback = function(Value)
+            aimRadius = Value
+    	end
+}, "Slider")
 
 AimbotTab:AddColorpicker({
     Name = "Aim Circle Color",
@@ -286,21 +330,30 @@ AimbotTab:AddColorpicker({
         aimColor = Value
     end
 })
+local ColorPicker = Tab:CreateColorPicker({
+    Name = "Aim Color",
+	Color = Color3.fromRGB(86, 171, 128),
+    Default = aimColor,
+	Flag = "ColorPicker1",
+	Callback = function(Value)
+        aimColor = Value
+	end
+}, "ColorPicker") 
 
-AimbotTab:AddSlider({
-    Name = "Aim Smoothness",
-    Min = 1,
-    Max = 20,
-    Default = aimSmoothness,
-    Color = Color3.fromRGB(255,255,255),
-    Callback = function(Value)
-        aimSmoothness = Value
-    end
+local AimSmoth = Tab:CreateSlider({
+    Name = "Smooth Aim",
+	Range = {0, 20}, -- The Minimum And Maximum Values Respectively
+	Increment = 1,
+    Default = aimSmoothness, -- Basically The Changing Value/Rounding Off
+	CurrentValue = 0,
+    	Callback = function(Value)
+            aimSmoothness = Value
+    	end
+}, "Slider")
+
+Luna:Notification({ 
+	Title = "MajesticHUB Loaded",
+	Icon = "rbxassetid://4483362458",
+	ImageSource = "Material",
+	Content = "Welcome to MajesticHUB!",
 })
-OrionLib:MakeNotification({
-    Name = "MagHUBv1 Loaded",
-    Content = "Welcome to MagHUBv1!",
-    Image = "rbxassetid://4483362458",
-    Time = 3
-})
-OrionLib:Init()
