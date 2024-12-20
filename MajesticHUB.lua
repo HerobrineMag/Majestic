@@ -29,30 +29,38 @@ local Window = Luna:CreateWindow({
 	}
 })
 
-local MiskTab = Window:CreateTab({
+local MainTab = Window:CreateTab({
     Name = "Main",
-    Icon = "4483362458",
+    Icon = "align-justify",
+    ImageSource = "Lucide",
+    ShowTitle = false
 })
 
 local ESPTab = Window:CreateTab({
     Name = "ESP",
-    Icon = "4483362458"
+    Icon = "box",
+    ImageSource = "Lucide",
+    ShowTitle = false
 })
 
 local AimbotTab = Window:CreateTab({
     Name = "AimBot",
-    Icon = "4483362458",
+    Icon = "bot",
+    ImageSource = "Lucide",
+    ShowTitle = false
 })
 
 local DeathBallTab = Window:CreateTab({
     Name = "Death Ball",
-    Icon = "138671771936723",
+    Icon = "aperture",
+    ImageSource = "Lucide",
+    ShowTitle = false
 })
 
 local Bind = Tab:CreateBind({
 	Name = "MainMenu",
 	Description = nil,
-	CurrentBind = "LAlt", -- Check Roblox Studio Docs For KeyCode Names
+	CurrentBind = "J", -- Check Roblox Studio Docs For KeyCode Names
 	HoldToInteract = false, -- When true, Instead of toggling, You hold to achieve the active state of the Bind
     	Callback = function()
     	end,
