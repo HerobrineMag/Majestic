@@ -28,54 +28,38 @@ local Window = Luna:CreateWindow({
 		}
 	}
 })
-
 local MainTab = Window:CreateTab({
     Name = "Main",
-    Icon = "align-justify",
-    ImageSource = "Lucide",
-    ShowTitle = false
+    ShowTitle = true
+})
+
+
+local SpeedTab = Window:CreateTab({
+    Name = "SpeedHack",
+    ShowTitle = true
 })
 
 local ESPTab = Window:CreateTab({
     Name = "ESP",
-    Icon = "box",
-    ImageSource = "Lucide",
-    ShowTitle = false
+    ShowTitle = true
 })
 
 local AimbotTab = Window:CreateTab({
     Name = "AimBot",
-    Icon = "bot",
-    ImageSource = "Lucide",
-    ShowTitle = false
+    ShowTitle = true
 })
 
 local DeathBallTab = Window:CreateTab({
     Name = "Death Ball",
-    Icon = "aperture",
-    ImageSource = "Lucide",
-    ShowTitle = false
+    ShowTitle = true
 })
 
-local Bind = Tab:CreateBind({
-	Name = "MainMenu",
-	Description = nil,
-	CurrentBind = "J", -- Check Roblox Studio Docs For KeyCode Names
-	HoldToInteract = false, -- When true, Instead of toggling, You hold to achieve the active state of the Bind
-    	Callback = function()
-    	end,
-
-	OnChangedCallback = function(Bind)
-	 Window.Bind = Bind
-	end,
-}, "WindowMenuBind") 
-
-local Button = Tab:CreateButton({
+MainTab:CreateButton({
 	Name = "Infinite Yield",
 	Description = nil, 
-    	Callback = function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-    	end
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end
 })
 
 local player = game.Players.LocalPlayer
@@ -83,33 +67,26 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
-local defaultSpeed = humanoid.WalkSpeed
-local maxSpeed = 200
-local speed = defaultSpeed
+local speed = humanoid.WalkSpeed
 
 local function updateSpeed(value)
     speed = value
 end
 
-local SpeedTab = Window:CreateTab({
-    Name = "SpeedHack",
-    Icon = "rbxassetid://6031095930",
-})
-
-local Speed = Tab:CreateSlider({
+SpeedTab:CreateSlider({
     Name = "Speed",
-	Range = {humanoid.WalkSpeed, maxSpeed},
+	Range = {humanoid.WalkSpeed, 200},
 	Increment = 1,
-    Default = defaultSpeed,
+    Default = humanoid.WalkSpeed,
     CurrentValue = humanoid.WalkSpeed,
     Callback = function(Value)
         updateSpeed(value)
     end	
-}, "Slider")
+}, "SpeedSlider")
 
 
 game:GetService("RunService").Heartbeat:Connect(function()
-    if humanoid.MoveDirection.Magnitude > 0 then
+    if humanoid and humanoidRootPart and humanoid.MoveDirection.Magnitude > 0 then
         local direction = humanoid.MoveDirection.Unit
         local velocity = humanoidRootPart.Velocity
         humanoidRootPart.Velocity = Vector3.new(direction.X * speed, velocity.Y, direction.Z * speed)
@@ -164,7 +141,7 @@ game.Players.PlayerAdded:Connect(function(player)
     addESPToPlayer(player)
 end)
 
-local ESPTab = Tab:CreateToggle({
+ESPTab:CreateToggle({
 	Name = "Enable ESP",
 	Description = nil,
 	CurrentValue = false,
@@ -172,9 +149,9 @@ local ESPTab = Tab:CreateToggle({
             espEnabled = Value
             updateESP()
     	end
-}, "Toggle")
+}, "ESPToggle")
 
-local ESPTab = Tab:CreateColorPicker({
+ESPTab:CreateColorPicker({
     Name = "ESP Color",
     Default = espColor,
 	Color = Color3.fromRGB(86, 171, 128),
@@ -293,75 +270,51 @@ local function disableAimbot()
 end
 
 -- Переключатель аимбота
-AimbotTab:AddToggle({
-    Name = "Enable Aimbot",
-    Default = aimbotEnabled,
-    Callback = function(Value)
-        aimbotEnabled = Value
-        if aimbotEnabled then
-            enableAimbot()
-        else
-            disableAimbot()
-        end
-    end
-})
-local AimbotTab = Tab:CreateToggle({
+AimbotTab:CreateToggle({
 	Name = "Enable Aimbot",
     Default = aimbotEnabled,
 	Description = nil,
 	CurrentValue = false,
-    	Callback = function(Value)
+    Callback = function(Value)
         aimbotEnabled = Value
-        if aimbotEnabled then
-            enableAimbot()
-        else
-            disableAimbot()
-        end
+            if aimbotEnabled then
+                enableAimbot()
+            else
+                disableAimbot()
+            end
     end
-}, "Toggle")
+}, "AimbotToggle")
 
-local AimbotRadius = Tab:CreateSlider({
+AimbotTab:CreateSlider({
     Name = "Aim Radius",
 	Range = {0, 300}, -- The Minimum And Maximum Values Respectively
 	Increment = 1,
-    Default = aimRadius,
-    CurrentValue = 0,
-    	Callback = function(Value)
-            aimRadius = Value
-    	end
-}, "Slider")
-
-AimbotTab:AddColorpicker({
-    Name = "Aim Circle Color",
-    Default = aimColor,
+    CurrentValue = aimRadius,
     Callback = function(Value)
-        aimColor = Value
+        aimRadius = Value
     end
-})
-local ColorPicker = Tab:CreateColorPicker({
+}, "RadiusSlider")
+
+AimbotTab:CreateColorPicker({
     Name = "Aim Color",
-	Color = Color3.fromRGB(86, 171, 128),
-    Default = aimColor,
+	Color = Color3.fromRGB(255, 0, 0),
 	Flag = "ColorPicker1",
 	Callback = function(Value)
         aimColor = Value
 	end
-}, "ColorPicker") 
+}, "AimbotColorPicker") 
 
-local AimSmoth = Tab:CreateSlider({
+AimbotTab:CreateSlider({
     Name = "Smooth Aim",
-	Range = {0, 20}, -- The Minimum And Maximum Values Respectively
+	Range = {1, 20}, -- The Minimum And Maximum Values Respectively
 	Increment = 1,
-    Default = aimSmoothness, -- Basically The Changing Value/Rounding Off
-	CurrentValue = 0,
-    	Callback = function(Value)
-            aimSmoothness = Value
-    	end
-}, "Slider")
+	CurrentValue = aimSmoothness,
+    Callback = function(Value)
+        aimSmoothness = Value
+    end
+}, "SmoothSlider")
 
 Luna:Notification({ 
 	Title = "MajesticHUB Loaded",
-	Icon = "rbxassetid://4483362458",
-	ImageSource = "Material",
 	Content = "Welcome to MajesticHUB!",
 })
