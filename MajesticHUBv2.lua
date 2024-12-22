@@ -15,12 +15,12 @@ local Window = Luna:CreateWindow({
 
 	KeySystem = false, 
 	KeySettings = {
-		Title = "Luna Example Key",
+		Title = "MajesticHUB",
 		Subtitle = "Key System",
-		Note = "Best Key System Ever! Also, Please Use A HWID Keysystem like Pelican, Luarmor etc. that provide key strings based on your HWID since putting a simple string is very easy to bypass",
+		Note = "Welcome to MajesticHUB!",
 		SaveInRoot = false, 
 		SaveKey = true,
-		Key = {"Example Key"},
+		Key = {"testkey"},
 		SecondAction = {
 			Enabled = true,
 			Type = "Link",
@@ -30,28 +30,38 @@ local Window = Luna:CreateWindow({
 })
 local MainTab = Window:CreateTab({
     Name = "Main",
-    ShowTitle = true
+    ShowTitle = true,
+    Icon = "format_list_bulleted",
+    ImageSource = "Material"
 })
 
 
 local SpeedTab = Window:CreateTab({
-    Name = "SpeedHack",
-    ShowTitle = true
+    Name = "Speed",
+    ShowTitle = true,
+    Icon = "directions_run",
+    ImageSource = "Material"
 })
 
 local ESPTab = Window:CreateTab({
     Name = "ESP",
-    ShowTitle = true
+    ShowTitle = true,
+    Icon = "visibility_off",
+    ImageSource = "Material"
 })
 
 local AimbotTab = Window:CreateTab({
     Name = "AimBot",
-    ShowTitle = true
+    ShowTitle = true,
+    Icon = "account_circle",
+    ImageSource = "Material"
 })
 
 local DeathBallTab = Window:CreateTab({
     Name = "Death Ball",
-    ShowTitle = true
+    ShowTitle = true,
+    Icon = "sports_baseball",
+    ImageSource = "Material"
 })
 
 MainTab:CreateButton({
@@ -69,24 +79,22 @@ local humanoid = character:WaitForChild("Humanoid")
 
 local speed = humanoid.WalkSpeed
 
-local function updateSpeed(value)
-    speed = value
+local function updateSpeed(Value)
+    speed = Value
 end
 
 SpeedTab:CreateSlider({
     Name = "Speed",
-	Range = {humanoid.WalkSpeed, 200},
+	Range = {speed, 200},
 	Increment = 1,
-    Default = humanoid.WalkSpeed,
-    CurrentValue = humanoid.WalkSpeed,
+    CurrentValue = speed,
     Callback = function(Value)
-        updateSpeed(value)
+        updateSpeed(Value)
     end	
 }, "SpeedSlider")
 
-
 game:GetService("RunService").Heartbeat:Connect(function()
-    if humanoid and humanoidRootPart and humanoid.MoveDirection.Magnitude > 0 then
+    if humanoid.MoveDirection.Magnitude > 0 then
         local direction = humanoid.MoveDirection.Unit
         local velocity = humanoidRootPart.Velocity
         humanoidRootPart.Velocity = Vector3.new(direction.X * speed, velocity.Y, direction.Z * speed)
@@ -95,7 +103,7 @@ end)
 
 local espEnabled = false
 local highlightTable = {}
-local espColor = Color3.fromRGB(255, 255, 255)
+local espColor = Color3.fromRGB(0, 0, 0)
 
 local function createHighlight(character)
     local highlight = Instance.new("Highlight")
@@ -154,7 +162,7 @@ ESPTab:CreateToggle({
 ESPTab:CreateColorPicker({
     Name = "ESP Color",
     Default = espColor,
-	Color = Color3.fromRGB(86, 171, 128),
+	Color = Color3.fromRGB(0, 0, 0),
 	Flag = "ColorPicker1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(Value)
         espColor = Value
