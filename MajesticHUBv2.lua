@@ -30,47 +30,56 @@ local Window = Luna:CreateWindow({
 })
 local MainTab = Window:CreateTab({
     Name = "Main",
-    ShowTitle = true,
     Icon = "format_list_bulleted",
-    ImageSource = "Material"
+    ImageSource = "Material",
+    ShowTitle = true
 })
 
-
-local SpeedTab = Window:CreateTab({
-    Name = "Speed",
-    ShowTitle = true,
+local Movement = Window:CreateTab({
+    Name = "Movement",
     Icon = "directions_run",
-    ImageSource = "Material"
+    ImageSource = "Material",
+    ShowTitle = true
 })
 
-local ESPTab = Window:CreateTab({
-    Name = "ESP",
-    ShowTitle = true,
+local Visual = Window:CreateTab({
+    Name = "Visual",
     Icon = "visibility_off",
-    ImageSource = "Material"
+    ImageSource = "Material",
+    ShowTitle = true
 })
 
-local AimbotTab = Window:CreateTab({
-    Name = "AimBot",
-    ShowTitle = true,
+local Combat = Window:CreateTab({
+    Name = "Combat",
     Icon = "account_circle",
-    ImageSource = "Material"
+    ImageSource = "Material",
+    ShowTitle = true
 })
 
 local DeathBallTab = Window:CreateTab({
     Name = "Death Ball",
-    ShowTitle = true,
     Icon = "sports_baseball",
-    ImageSource = "Material"
+    ImageSource = "Material",
+    ShowTitle = true
 })
 
-MainTab:CreateButton({
+local Button = MainTab:CreateButton({
 	Name = "Infinite Yield",
 	Description = nil, 
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
     end
 })
+
+local Button = MainTab:CreateButton({
+	Name = "Invisible",
+	Description = nil, 
+    Callback = function()
+        loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
+    end
+})
+
+Movement:CreateSection("Speed")
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -83,7 +92,18 @@ local function updateSpeed(Value)
     speed = Value
 end
 
-SpeedTab:CreateSlider({
+local function onCharacterAdded(newCharacter)
+    if newCharacter == player.Character then
+        character = newCharacter
+        humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        humanoid = character:WaitForChild("Humanoid")
+        humanoid.WalkSpeed = speed -- Применяем сохраненную скорость
+    end
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+
+Movement:CreateSlider({
     Name = "Speed",
 	Range = {speed, 200},
 	Increment = 1,
@@ -94,7 +114,7 @@ SpeedTab:CreateSlider({
 }, "SpeedSlider")
 
 game:GetService("RunService").Heartbeat:Connect(function()
-    if humanoid.MoveDirection.Magnitude > 0 then
+    if humanoid and humanoid.MoveDirection.Magnitude > 0 then
         local direction = humanoid.MoveDirection.Unit
         local velocity = humanoidRootPart.Velocity
         humanoidRootPart.Velocity = Vector3.new(direction.X * speed, velocity.Y, direction.Z * speed)
@@ -149,7 +169,9 @@ game.Players.PlayerAdded:Connect(function(player)
     addESPToPlayer(player)
 end)
 
-ESPTab:CreateToggle({
+Visual:CreateSection("ESP")
+
+Visual:CreateToggle({
 	Name = "Enable ESP",
 	Description = nil,
 	CurrentValue = false,
@@ -159,10 +181,10 @@ ESPTab:CreateToggle({
     	end
 }, "ESPToggle")
 
-ESPTab:CreateColorPicker({
+Visual:CreateColorPicker({
     Name = "ESP Color",
     Default = espColor,
-	Color = Color3.fromRGB(0, 0, 0),
+	Color = Color3.fromRGB(255, 255, 255),
 	Flag = "ColorPicker1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(Value)
         espColor = Value
@@ -174,6 +196,7 @@ ESPTab:CreateColorPicker({
     end
 }, "ColorPicker")
 
+Combat:CreateSection("AimBot")
 
 local player = game.Players.LocalPlayer
 local camera = game.Workspace.CurrentCamera
@@ -278,7 +301,7 @@ local function disableAimbot()
 end
 
 -- Переключатель аимбота
-AimbotTab:CreateToggle({
+Combat:CreateToggle({
 	Name = "Enable Aimbot",
     Default = aimbotEnabled,
 	Description = nil,
@@ -293,7 +316,7 @@ AimbotTab:CreateToggle({
     end
 }, "AimbotToggle")
 
-AimbotTab:CreateSlider({
+Combat:CreateSlider({
     Name = "Aim Radius",
 	Range = {0, 300}, -- The Minimum And Maximum Values Respectively
 	Increment = 1,
@@ -303,7 +326,7 @@ AimbotTab:CreateSlider({
     end
 }, "RadiusSlider")
 
-AimbotTab:CreateColorPicker({
+Combat:CreateColorPicker({
     Name = "Aim Color",
 	Color = Color3.fromRGB(255, 0, 0),
 	Flag = "ColorPicker1",
@@ -312,7 +335,7 @@ AimbotTab:CreateColorPicker({
 	end
 }, "AimbotColorPicker") 
 
-AimbotTab:CreateSlider({
+Combat:CreateSlider({
     Name = "Smooth Aim",
 	Range = {1, 20}, -- The Minimum And Maximum Values Respectively
 	Increment = 1,
@@ -323,6 +346,8 @@ AimbotTab:CreateSlider({
 }, "SmoothSlider")
 
 Luna:Notification({ 
-	Title = "MajesticHUB Loaded",
-	Content = "Welcome to MajesticHUB!",
+	Title = "Loaded...",
+    Icon = "done_outline",
+	ImageSource = "Material",
+	Content = "Welcome to MajesticHUB!"
 })
