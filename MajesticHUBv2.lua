@@ -1,33 +1,34 @@
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/main/source.lua", true))()
 
 local Window = Luna:CreateWindow({
-	Name = "MajesticHUB",
-	Subtitle = nil,
-	LogoID = "82795327169782",
-	LoadingEnabled = true,
-	LoadingTitle = "Loaded MajesticHUB...",
-	LoadingSubtitle = "by HerobrineMag",
+    Name = "MajesticHUB",
+    Subtitle = nil,
+    LogoID = "82795327169782",
+    LoadingEnabled = true,
+    LoadingTitle = "Loaded MajesticHUB...",
+    LoadingSubtitle = "by HerobrineMag",
 
-	ConfigSettings = {
-		RootFolder = nil, 
-		ConfigFolder = "MajesticHUB"
-	},
+    ConfigSettings = {
+        RootFolder = nil,
+        ConfigFolder = "MajesticHUB"
+    },
 
-	KeySystem = false, 
-	KeySettings = {
-		Title = "MajesticHUB",
-		Subtitle = "Key System",
-		Note = "Welcome to MajesticHUB!",
-		SaveInRoot = false, 
-		SaveKey = true,
-		Key = {"testkey"},
-		SecondAction = {
-			Enabled = true,
-			Type = "Link",
-			Parameter = ""
-		}
-	}
+    KeySystem = false,
+    KeySettings = {
+        Title = "MajesticHUB",
+        Subtitle = "Key System",
+        Note = "Welcome to MajesticHUB!",
+        SaveInRoot = false,
+        SaveKey = true,
+        Key = {"testkey"},
+        SecondAction = {
+            Enabled = true,
+            Type = "Link",
+            Parameter = ""
+        }
+    }
 })
+
 local MainTab = Window:CreateTab({
     Name = "Main",
     Icon = "format_list_bulleted",
@@ -51,7 +52,7 @@ local Visual = Window:CreateTab({
 
 local Combat = Window:CreateTab({
     Name = "Combat",
-    Icon = "account_circle",
+    Icon = "gps_fixed",
     ImageSource = "Material",
     ShowTitle = true
 })
@@ -64,18 +65,26 @@ local DeathBallTab = Window:CreateTab({
 })
 
 local Button = MainTab:CreateButton({
-	Name = "Infinite Yield",
-	Description = nil, 
+    Name = "Infinite Yield",
+    Description = nil, 
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
     end
 })
 
 local Button = MainTab:CreateButton({
-	Name = "Invisible",
-	Description = nil, 
+    Name = "Invisible",
+    Description = nil, 
     Callback = function()
         loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
+    end
+})
+
+local Button = MainTab:CreateButton({
+    Name = "AntiAFK",
+    Description = nil, 
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/KazeOnTop/Rice-Anti-Afk/main/Wind", true))()
     end
 })
 
@@ -105,12 +114,12 @@ player.CharacterAdded:Connect(onCharacterAdded)
 
 Movement:CreateSlider({
     Name = "Speed",
-	Range = {speed, 200},
-	Increment = 1,
+    Range = {speed, 200},
+    Increment = 1,
     CurrentValue = speed,
     Callback = function(Value)
         updateSpeed(Value)
-    end	
+    end    
 }, "SpeedSlider")
 
 game:GetService("RunService").Heartbeat:Connect(function()
@@ -172,21 +181,21 @@ end)
 Visual:CreateSection("ESP")
 
 Visual:CreateToggle({
-	Name = "Enable ESP",
-	Description = nil,
-	CurrentValue = false,
-    	Callback = function(Value)
-            espEnabled = Value
-            updateESP()
-    	end
+    Name = "Enable ESP",
+    Description = nil,
+    CurrentValue = false,
+    Callback = function(Value)
+        espEnabled = Value
+        updateESP()
+    end
 }, "ESPToggle")
 
 Visual:CreateColorPicker({
     Name = "ESP Color",
     Default = espColor,
-	Color = Color3.fromRGB(255, 255, 255),
-	Flag = "ColorPicker1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-	Callback = function(Value)
+    Color = Color3.fromRGB(255, 255, 255),
+    Flag = "ColorPicker1", 
+    Callback = function(Value)
         espColor = Value
         for _, highlight in pairs(highlightTable) do
             if highlight then
@@ -208,6 +217,7 @@ local aimColor = Color3.fromRGB(255, 0, 0)
 local aimSmoothness = 1
 local aimbotEnabled = false
 local mouse = player:GetMouse()
+local ignoreTeammates = false -- Переменная для хранения состояния TeamCheck
 
 local circle = Drawing.new("Circle")
 circle.Visible = false
@@ -217,16 +227,27 @@ circle.Transparency = 1
 circle.Filled = false
 circle.Radius = aimRadius
 
--- Функция для поиска ближайшей головы
+-- Функция для проверки, является ли другой игрок союзником
+local function isTeammate(otherPlayer)
+    local localPlayer = game.Players.LocalPlayer
+    return localPlayer.Team == otherPlayer.Team -- Если TeamCheck включен, то проверяем, что игрок НЕ из той же команды
+end
+
+-- Функция для поиска ближайшей головы игрока в радиусе, теперь она проверяет на союзников
 local function findNearestPlayerHeadInRadius(radius)
     local nearestHead = nil
     local nearestDistance = radius
 
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-        if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("Head") then
+        if otherPlayer ~= game.Players.LocalPlayer and otherPlayer.Character and otherPlayer.Character:FindFirstChild("Head") then
+            -- Если TeamCheck включен, мы пропускаем тимейтов
+            if ignoreTeammates and isTeammate(otherPlayer) then
+                continue
+            end
+            
             local head = otherPlayer.Character.Head
-            local screenPosition, onScreen = camera:WorldToViewportPoint(head.Position)
-            local distanceFromCenter = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)).Magnitude
+            local screenPosition, onScreen = game.Workspace.CurrentCamera:WorldToViewportPoint(head.Position)
+            local distanceFromCenter = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(game.Workspace.CurrentCamera.ViewportSize.X / 2, game.Workspace.CurrentCamera.ViewportSize.Y / 2)).Magnitude
 
             if distanceFromCenter <= radius and onScreen and distanceFromCenter < nearestDistance then
                 nearestHead = head
@@ -234,11 +255,9 @@ local function findNearestPlayerHeadInRadius(radius)
             end
         end
     end
-
     return nearestHead
 end
 
--- Функция для наведения камеры на голову
 local function aimAt(head)
     if head then
         local headPosition = head.Position
@@ -248,12 +267,10 @@ local function aimAt(head)
     end
 end
 
--- Переменные для хранения подключений
 local aimConnection
 local aimMouseDownConnection
 local aimMouseUpConnection
 
--- Функция для активации аимбота
 local function enableAimbot()
     circle.Visible = true
     aimMouseDownConnection = mouse.Button2Down:Connect(function()
@@ -279,7 +296,6 @@ local function enableAimbot()
     end)
 end
 
--- Функция для деактивации аимбота
 local function disableAimbot()
     aiming = false
     circle.Visible = false
@@ -300,26 +316,26 @@ local function disableAimbot()
     end
 end
 
--- Переключатель аимбота
 Combat:CreateToggle({
-	Name = "Enable Aimbot",
+    Name = "Aimbot",
     Default = aimbotEnabled,
-	Description = nil,
-	CurrentValue = false,
+    Description = nil,
+    CurrentValue = false,
     Callback = function(Value)
         aimbotEnabled = Value
-            if aimbotEnabled then
-                enableAimbot()
-            else
-                disableAimbot()
-            end
+        if aimbotEnabled then
+            enableAimbot()
+        else
+            disableAimbot()
+        end
     end
 }, "AimbotToggle")
 
 Combat:CreateSlider({
-    Name = "Aim Radius",
-	Range = {0, 300}, -- The Minimum And Maximum Values Respectively
-	Increment = 1,
+    Name = "Radius",
+    Range = {0, 300},
+    Default = aimRadius,
+    Increment = 1,
     CurrentValue = aimRadius,
     Callback = function(Value)
         aimRadius = Value
@@ -328,26 +344,35 @@ Combat:CreateSlider({
 
 Combat:CreateColorPicker({
     Name = "Aim Color",
-	Color = Color3.fromRGB(255, 0, 0),
-	Flag = "ColorPicker1",
-	Callback = function(Value)
+    Color = aimColor,
+    Flag = "ColorPicker1",
+    Callback = function(Value)
         aimColor = Value
-	end
-}, "AimbotColorPicker") 
+    end
+}, "AimbotColorPicker")
 
 Combat:CreateSlider({
-    Name = "Smooth Aim",
-	Range = {1, 20}, -- The Minimum And Maximum Values Respectively
-	Increment = 1,
-	CurrentValue = aimSmoothness,
+    Name = "Smooth",
+    Range = {1, 20},
+    Increment = 1,
+    CurrentValue = aimSmoothness,
     Callback = function(Value)
         aimSmoothness = Value
     end
 }, "SmoothSlider")
 
-Luna:Notification({ 
-	Title = "Loaded...",
+Combat:CreateToggle({
+    Name = "TeamCheck",
+    Default = ignoreTeammates,
+    CurrentValue = false,
+    Callback = function(Value)
+        ignoreTeammates = Value
+    end
+}, "IgnoreTeammatesToggle")
+
+Luna:Notification({
+    Title = "Loaded...",
     Icon = "done_outline",
-	ImageSource = "Material",
-	Content = "Welcome to MajesticHUB!"
+    ImageSource = "Material",
+    Content = "Welcome to MajesticHUB!"
 })
